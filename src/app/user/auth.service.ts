@@ -119,8 +119,11 @@ export class AuthService {
     this.authStatusChanged.next(true);
     return;
   }
-  getAuthenticatedUser() {}
+  getAuthenticatedUser() {
+    return userPool.getCurrentUser();
+  }
   logout() {
+    this.getAuthenticatedUser().signOut();
     this.authStatusChanged.next(false);
   }
   isAuthenticated(): Observable<boolean> {
@@ -129,7 +132,16 @@ export class AuthService {
       if (!user) {
         observer.next(false);
       } else {
-        observer.next(false);
+        user.getSession((err, session) => {
+          if (err) observer.next(false);
+          else if (session) {
+            if (session.isValid()) {
+              observer.next(true);
+            } else {
+              observer.next(false);
+            }
+          }
+        });
       }
       observer.complete();
     });
