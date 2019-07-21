@@ -9,7 +9,9 @@ import { User } from "./user.model";
 import {
   CognitoUserPool,
   CognitoUserAttribute,
-  CognitoUser
+  CognitoUser,
+  AuthenticationDetails,
+  CognitoUserSession
 } from "amazon-cognito-identity-js";
 
 const POOL_DATA = {
@@ -89,6 +91,31 @@ export class AuthService {
       Username: username,
       Password: password
     };
+    const authDetails: AuthenticationDetails = new AuthenticationDetails(
+      authData
+    );
+
+    const userData = {
+      Username: username,
+      Pool: userPool
+    };
+
+    const cognitoUser: CognitoUser = new CognitoUser(userData);
+    const that = this;
+    cognitoUser.authenticateUser(authDetails, {
+      onSuccess(result: CognitoUserSession) {
+        console.log(result);
+        that.authDidFail.next(false);
+        that.authStatusChanged.next(true);
+        that.authIsLoading.next(false);
+      },
+      onFailure(err) {
+        that.authDidFail.next(true);
+        that.authIsLoading.next(false);
+        console.log(err);
+      }
+    });
+
     this.authStatusChanged.next(true);
     return;
   }
