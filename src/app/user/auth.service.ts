@@ -113,11 +113,9 @@ export class AuthService {
         that.authDidFail.next(true);
         that.authIsLoading.next(false);
         console.log(err);
+        
       }
     });
-
-    this.authStatusChanged.next(true);
-    return;
   }
   getAuthenticatedUser() {
     return userPool.getCurrentUser();
